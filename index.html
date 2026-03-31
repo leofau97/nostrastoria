@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>La Nostra Storia ❤️</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --yellow:#FFE500; --blue:#1B2FFF; --pink:#FF2D9B;
+  --black:#0D0D0D;  --white:#FFFEF0;
+}
+html,body { width:100%; height:100%; overflow:hidden; background:var(--yellow); font-family:'Bangers',cursive; }
+body::before {
+  content:''; position:fixed; inset:0;
+  background:radial-gradient(circle,#0003 1px,transparent 1px);
+  background-size:20px 20px; pointer-events:none;
+}
+
+/* progress */
+#progress { position:fixed; top:0; left:0; height:4px; width:0; background:var(--pink); z-index:999; transition:width .3s; }
+
+/* music */
+#mbtn {
+  position:fixed; top:12px; right:12px; z-index:999;
+  width:44px; height:44px; border-radius:50%;
+  background:var(--pink); border:3px solid var(--black);
+  font-size:20px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:3px 3px 0 var(--black);
+}
+
+/* book wrapper */
+#wrap {
+  position:fixed; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:8px 8px 72px;
+}
+
+/* book */
+#book {
+  position:relative;
+  width:min(96vw,480px);
+  height:min(78vh,660px);
+  border:4px solid var(--black);
+  box-shadow:8px 8px 0 var(--black);
+  overflow:hidden;
+  background:var(--white);
+}
+
+/* pages — all off-screen right, .cur = visible, .left = off-screen left */
+.pg {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  background:var(--white);
+  transform:translateX(100%);
+  transition:transform .38s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+}
+.pg.cur  { transform:translateX(0); }
+.pg.left { transform:translateX(-100%); }
+.pg.notrans { transition:none !important; }
+
+/* header */
+.ph {
+  background:var(--blue); color:var(--yellow);
+  font-size:12px; letter-spacing:3px;
+  padding:5px 12px; flex-shrink:0;
+  display:flex; justify-content:space-between;
+  border-bottom:3px solid var(--black);
+}
+
+/* photo */
+.pp {
+  flex:1; position:relative;
+  overflow:hidden; border-bottom:3px solid var(--black);
+  background:#aaa;
+}
+.pp img { width:100%; height:100%; object-fit:cover; display:block; }
+
+/* bubble */
+.bub {
+  position:absolute; background:var(--white);
+  border:3px solid var(--black); border-radius:40%;
+  padding:7px 11px; font-family:'Comic Neue',cursive;
+  font-size:clamp(10px,2.5vw,13px); font-weight:700;
+  max-width:44%; line-height:1.3; text-align:center;
+  box-shadow:3px 3px 0 var(--black); z-index:5;
+}
+.bub.tr{top:8px;right:8px;} .bub.tl{top:8px;left:8px;}
+.bub::after  {content:'';position:absolute;bottom:-13px;left:14px;border:6px solid transparent;border-top:8px solid var(--black);}
+.bub::before {content:'';position:absolute;bottom:-7px; left:16px;border:5px solid transparent;border-top:6px solid var(--white);z-index:1;}
+
+/* kapow */
+.kpw {
+  position:absolute; font-family:'Bangers',cursive;
+  font-size:clamp(20px,5.5vw,42px); color:var(--yellow);
+  text-shadow:2px 2px 0 var(--black),-1px -1px 0 var(--black),1px -1px 0 var(--black),-1px 1px 0 var(--black);
+  z-index:5; pointer-events:none;
+}
+.kpw.br{bottom:6px;right:6px;transform:rotate(-6deg);}
+.kpw.bl{bottom:6px;left:6px;transform:rotate(6deg);}
+
+/* caption */
+.pc {
+  background:var(--yellow); padding:9px 14px; flex-shrink:0;
+  font-family:'Comic Neue',cursive;
+  font-size:clamp(11px,2.8vw,14px); font-weight:700; line-height:1.4;
+}
+
+/* end page */
+.end {
+  background:var(--pink) !important;
+  align-items:center; justify-content:center;
+  text-align:center; gap:14px; padding:28px 20px;
+}
+.end-title { font-size:clamp(42px,11vw,76px); color:var(--yellow); line-height:.95; text-shadow:4px 4px 0 var(--black),-2px -2px 0 var(--black); }
+.end-hearts { font-size:clamp(30px,8vw,52px); animation:hb 1s ease-in-out infinite; }
+.end-msg {
+  background:var(--white); border:3px solid var(--black);
+  box-shadow:5px 5px 0 var(--black); padding:13px 18px;
+  font-family:'Comic Neue',cursive; font-size:clamp(12px,3vw,16px);
+  font-weight:700; line-height:1.6; max-width:300px;
+}
+.rbtn {
+  background:var(--blue); color:var(--yellow); font-family:'Bangers',cursive;
+  font-size:20px; letter-spacing:2px; padding:10px 28px;
+  border:3px solid var(--black); box-shadow:4px 4px 0 var(--black); cursor:pointer;
+}
+
+/* nav */
+#nav {
+  position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+  display:flex; gap:10px; align-items:center; z-index:99;
+}
+.nb {
+  background:var(--blue); color:var(--yellow); font-family:'Bangers',cursive;
+  font-size:18px; letter-spacing:1px; padding:10px 22px;
+  border:3px solid var(--black); box-shadow:4px 4px 0 var(--black);
+  cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none;
+}
+.nb:active { background:var(--pink); color:#fff; }
+.nb:disabled { opacity:.3; pointer-events:none; }
+#ctr {
+  background:var(--yellow); border:3px solid var(--black);
+  font-family:'Bangers',cursive; font-size:16px;
+  padding:8px 14px; box-shadow:3px 3px 0 var(--black);
+  min-width:78px; text-align:center;
+}
+
+@keyframes hb { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<audio id="aud" loop><source src="music.mp3" type="audio/mpeg"></audio>
+<div id="mbtn">🎵</div>
+
+<div id="wrap"><div id="book"></div></div>
+
+<div id="nav">
+  <button class="nb" id="bp" onclick="go(-1)">◀ PREC</button>
+  <div id="ctr">1/1</div>
+  <button class="nb" id="bn" onclick="go(1)">SUCC ▶</button>
+</div>
+
+<script>
+/* ── PERSONALIZZA QUI ── */
+const DATA = [
+  {f:"photo1.jpg",  c:"Il primo giorno che ci siamo incontrati... 💫",               b:"Ciao! 😊",           k:"BOOM! 💥"},
+  {f:"photo2.jpg",  c:"La prima volta che abbiamo riso insieme ♥",                   b:"Sei pazzesca!",       k:null},
+  {f:"photo3.jpg",  c:"Una di quelle giornate perfette che non dimenticherò mai.",   b:null,                  k:"WOW! ✨"},
+  {f:"photo4.jpg",  c:"Tu e io contro il mondo 🌍",                                  b:"Ti amo! ❤️",          k:null},
+  {f:"photo5.jpg",  c:"Quella volta che abbiamo riso così tanto da piangere 😂",     b:"Hahaha!",             k:null},
+  {f:"photo6.jpg",  c:"Un momento magico insieme ✨",                                b:null,                  k:"SPLENDIDA! 🌟"},
+  {f:"photo7.jpg",  c:"Quando sei tu, tutto diventa più bello 🌈",                   b:"Che bella giornata!", k:null},
+  {f:"photo8.jpg",  c:"La mia persona preferita nel mondo intero 🥰",                b:"Sei speciale!",       k:null},
+  {f:"photo9.jpg",  c:"Un ricordo che porto sempre nel cuore 💛",                    b:null,                  k:"AMORE! 💖"},
+  {f:"photo10.jpg", c:"Insieme siamo imbattibili! 💪",                               b:"Pronti?",             k:"ZAP! ⚡"},
+  {f:"photo11.jpg", c:"Ogni avventura è bella con te al fianco 🗺️",                  b:"Andiamo!",            k:null},
+  {f:"photo12.jpg", c:"Il tuo sorriso è la cosa più bella che conosco 😍",           b:"😄",                  k:null},
+  {f:"photo13.jpg", c:"Momenti normali che diventano straordinari 🌟",               b:null,                  k:"MAGICO! ✨"},
+  {f:"photo14.jpg", c:"Grazie per esserci sempre stata ❤️",                         b:"Sempre con te!",      k:null},
+  {f:"photo15.jpg", c:"Un anno fa iniziava la nostra avventura... 🚀",               b:null,                  k:"KAPOW! 💥"},
+  {f:"photo16.jpg", c:"E che avventura è stata! 🎉",                                b:"Evviva!",              k:null},
+  {f:"photo17.jpg", c:"La nostra storia continua... e sarà sempre meravigliosa 💫",  b:"Per sempre! ❤️",      k:"TO BE CONTINUED..."},
+];
+/* ─────────────────────── */
+
+const TOTAL = DATA.length + 1;
+const book  = document.getElementById('book');
+let cur = 0, busy = false;
+
+// Build DOM
+DATA.forEach((d,i) => {
+  const p = document.createElement('div');
+  p.className = 'pg' + (i===0?' cur':'');
+  const bs = i%2===0?'tr':'tl', ks = i%2===0?'br':'bl';
+  p.innerHTML =
+    `<div class="ph"><span>LA NOSTRA STORIA</span><span>★ ${i+1}/${DATA.length} ★</span></div>`+
+    `<div class="pp"><img src="${d.f}" alt="Foto ${i+1}">`+
+    (d.b?`<div class="bub ${bs}">${d.b}</div>`:'')+
+    (d.k?`<div class="kpw ${ks}">${d.k}</div>`:'')+
+    `</div>`+
+    `<div class="pc">${d.c}</div>`;
+  book.appendChild(p);
+});
+const ep = document.createElement('div');
+ep.className = 'pg end';
+ep.innerHTML =
+  `<div class="end-hearts">❤️</div>`+
+  `<div class="end-title">BUON<br>ANNIVERSARIO!</div>`+
+  `<div class="end-hearts">🎉</div>`+
+  `<div class="end-msg">Un anno di convivenza,<br>di risate, di avventure<br>e di amore.<br><br><strong>Grazie per ogni momento! ❤️</strong></div>`+
+  `<button class="rbtn" onclick="jump(0)">↩ RICOMINCIA</button>`;
+book.appendChild(ep);
+
+function allPages(){ return book.querySelectorAll('.pg'); }
+
+function go(dir){
+  if(busy) return;
+  const nxt = cur+dir;
+  if(nxt<0||nxt>=TOTAL) return;
+  busy=true;
+  const ps=allPages(), from=ps[cur], to=ps[nxt];
+
+  // position 'to' off-screen on the correct side, instantly
+  to.classList.add('notrans');
+  if(dir>0){ to.classList.remove('left'); to.style.transform='translateX(100%)'; }
+  else     { to.classList.remove('cur');  to.style.transform='translateX(-100%)'; }
+  to.offsetHeight; // force reflow
+  to.classList.remove('notrans');
+
+  // animate both
+  if(dir>0){
+    to.classList.add('cur');   to.style.transform='';
+    from.classList.remove('cur'); from.style.transform='translateX(-100%)';
+  } else {
+    to.classList.add('cur');   to.style.transform='';
+    from.classList.remove('cur'); from.style.transform='translateX(100%)';
+  }
+
+  setTimeout(()=>{
+    // clean up inline transforms, set proper class
+    from.style.transform='';
+    if(dir>0) from.classList.add('left'); else from.classList.remove('left');
+    cur=nxt; ui(); busy=false;
+  },400);
+}
+
+function jump(idx){
+  allPages().forEach((p,i)=>{
+    p.classList.remove('cur','left','notrans');
+    p.style.transform='';
+    if(i<idx) p.classList.add('left');
+    else if(i===idx) p.classList.add('cur');
+    // else stays translateX(100%) via default CSS
+  });
+  cur=idx; ui();
+}
+
+function ui(){
+  document.getElementById('bp').disabled = cur===0;
+  document.getElementById('bn').disabled = cur===TOTAL-1;
+  document.getElementById('ctr').textContent = `${cur+1} / ${TOTAL}`;
+  document.getElementById('progress').style.width = (cur/(TOTAL-1)*100)+'%';
+}
+
+// Music
+const aud=document.getElementById('aud'), mb=document.getElementById('mbtn');
+let pl=false;
+mb.onclick=()=>{ pl?(aud.pause(),pl=false,mb.textContent='🔇'):(aud.volume=.4,aud.play().catch(()=>{}),pl=true,mb.textContent='🎵'); };
+document.addEventListener('click',()=>{ if(!pl){aud.volume=.4;aud.play().then(()=>{pl=true;mb.textContent='🎵';}).catch(()=>{}); } },{once:true});
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' ') go(1);
+  if(e.key==='ArrowLeft') go(-1);
+});
+
+// Swipe
+let sx=0,sy=0;
+book.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+book.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40) go(dx<0?1:-1);
+},{passive:true});
+
+ui();
+</script>
+</body>
+</html>
